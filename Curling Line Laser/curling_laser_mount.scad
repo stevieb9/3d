@@ -14,14 +14,15 @@
 //    0.5 mm pitch / 80 mm = 6.25 mrad per knob turn = ~23 cm at the rock
 //    (1/16 turn ~ 1.5 cm).
 //
-//  foot  - printed flat: base on three rubber bumpers, pocket for a 2xAA
+//  foot  - printed flat: base on three rubber bumpers, pocket for a 3xAAA
 //          holder with switch; the tilt stage bolts on from below.
 //  tilt  - printed ON ITS SIDE (+Y up) so the flexure bends along the
 //          layers: base, flexure, laser arm, jack screw, and a split
 //          clamp for the laser (loosen it to roll the laser or slide it).
 //  knob  - thumb knob for the jack screw.
-//  phone - optional: bracket with a 1/4"-20 bolt for a phone tripod
-//          clamp, so the phone films from beside the laser.
+//
+//  Film from a SEPARATE tripod beside the laser: anything touching the
+//  foot (a phone being tapped) would knock the aim.
 //
 //  Origin = under the tilt pivot, on the foot's underside; beam along
 //  +X; +Z up; the ice is feet_h below z = 0. Millimetres. PETG.
@@ -29,11 +30,9 @@
 //    openscad -D 'part="foot"'  -o foot.stl        curling_laser_mount.scad
 //    openscad -D 'part="tilt"'  -o tilt.stl        curling_laser_mount.scad
 //    openscad -D 'part="knob"'  -o knob.stl        curling_laser_mount.scad
-//    openscad -D 'part="phone"' -o phone_mount.stl curling_laser_mount.scad
 // =====================================================================
 
-part       = "assembly"; // "assembly" | "foot" | "tilt" | "knob" | "phone"
-with_phone = false;      // assembly: add the optional phone bracket
+part       = "assembly"; // "assembly" | "foot" | "tilt" | "knob"
 show_band  = true;       // assembly: draw the elastic
 $fn = 48;
 
@@ -56,19 +55,18 @@ nut_ac  = nut_af / cos(30);                  // 6.35 across corners
 head_af = 5.5;      // knob pocket: M3 hex head, or a cap head glued in
 feet_d  = 12.7;     // VERIFY: stick-on rubber bumpers, diameter
 feet_h  = 3.5;      // VERIFY: ...and height
-batt    = [58, 32, 16];   // VERIFY: 2xAA holder with switch, L x W x H
-tri_af  = 11.11;  tri_head = 4.0;  tri_hole = 6.6;  // 1/4"-20 hex bolt
-tri_len = 12.7;     // VERIFY: 1/4"-20 bolt length (1/2")
-tri_out = 5.5;      // thread left standing for the phone clamp
+batt    = [64, 37, 16];   // VERIFY: 3xAAA holder with on/off switch, L x W x H
+                          // (Amazon 6-pack; Adafruit's near-twin #727 is
+                          // 63.5 x 36.8 x 15.7). 3 cells: alkaline or NiMH,
+                          // NOT lithium (fresh ones can top the laser's 5.2 V)
 
 // ---- foot -----------------------------------------------------------
 h_ft    = 16;       // foot thickness
 foot_x  = [-102, 23];
 foot_y  = [-30, 57];
 foot_r  = 10;   chamf = 2;
-batt_xy = [-88, 21];         // battery pocket corner
+batt_xy = [-88, 12];         // battery pocket corner (clear of the tilt floor, y +/-9)
 bumpers = [[14, 0], [-95, -20], [-95, 47]];   // three points never rock
-phone_holes = [[-4, 46], [10, 46]];
 mount_x = [-25, -60];        // tilt stage bolts (M3 x 20 from below)
 
 // ---- tilt stage -----------------------------------------------------
@@ -82,12 +80,6 @@ gap_t    = 8;       // arm <-> pedestal at level
 clamp_x  = [-6, 10];         // clamp block along X (holds 16 of barrel)
 clamp_yp = 15;      // clamp block reaches +Y this far (pinch side)
 pinch    = [2, 10.8];        // pinch screw (x, y)
-
-// ---- phone bracket (optional) ---------------------------------------
-ph_x    = [-12, 18];         // along X
-ph_h    = 55;                // top above the foot top
-ph_bolt = [3, 70];           // 1/4"-20 bolt (x, y)
-ph_t    = tri_len - tri_out + tri_head + 0.3;   // top plate thickness
 
 // =====================================================================
 //  DERIVED
@@ -160,7 +152,7 @@ module foot() {
             linear_extrude(h_ft - chamf) foot2d();
             linear_extrude(h_ft) offset(delta = -chamf) foot2d();
         }
-        // 2xAA holder pocket (2 mm floor)
+        // battery holder pocket (2 mm floor)
         translate([batt_xy[0], batt_xy[1], 2]) cube([batt[0] + 0.6, batt[1] + 0.6, h_ft]);
         // locating recesses for the bumpers
         for (b = bumpers) translate([b[0], b[1], -1]) cylinder(d = feet_d + 0.6, h = 1.6);
@@ -168,12 +160,6 @@ module foot() {
         for (mx = mount_x) {
             translate([mx, 0, -1]) cylinder(d = m3_hole, h = h_ft + 2);
             translate([mx, 0, -0.01]) cylinder(d = 6.2, h = 3.4);
-        }
-        // phone bracket: nuts pulled up into pockets from below
-        for (p = phone_holes) {
-            translate([p[0], p[1], -0.01])
-                cylinder(d = (nut_af + nut_c) / cos(30), h = nut_t + nut_c, $fn = 6);
-            translate([p[0], p[1], -1]) cylinder(d = m3_hole, h = h_ft + 2);
         }
         // broom marks: V on the front edge = beam line; Vs on both sides
         // under the tilt pivot, to lay over the T-line
@@ -261,26 +247,6 @@ module knob() {
 }
 
 // =====================================================================
-//  PHONE BRACKET  (optional; bolts to the foot's front-left corner)
-// =====================================================================
-module phone2d() {                          // (y, z) profile
-    z0 = h_ft;  zt = h_ft + ph_h;
-    polygon([[38, z0], [56, z0], [56, zt - ph_t], [80, zt - ph_t], [80, zt],
-             [50, zt], [50, z0 + 28], [38, z0 + 5]]);
-}
-module phone_mount() {
-    difference() {
-        translate([ph_x[0], 0, 0]) rotate([90, 0, 90])
-            linear_extrude(ph_x[1] - ph_x[0]) phone2d();
-        for (p = phone_holes) translate([p[0], p[1], 0]) tear_z(m3_hole, h_ft - 1, 8, 0);
-        translate([ph_bolt[0], ph_bolt[1], 0])
-            tear_z(tri_hole, h_ft + ph_h - ph_t - 1, ph_t + 2, 0);
-        translate([ph_bolt[0], ph_bolt[1], h_ft + ph_h - ph_t - 0.01])
-            cylinder(d = (tri_af + 0.4) / cos(30), h = tri_head + 0.3, $fn = 6);
-    }
-}
-
-// =====================================================================
 //  ASSEMBLY HELPERS
 // =====================================================================
 module laser_dummy() {
@@ -310,17 +276,9 @@ if (part == "assembly") {
         for (b = bumpers) translate([b[0], b[1], -feet_h]) cylinder(d = feet_d, h = feet_h);
     }
     if (show_band) band();
-    if (with_phone) {
-        color("SlateGray") phone_mount();
-        color("DarkSlateGray") translate([ph_bolt[0] - 6, ph_bolt[1] - 25, h_ft + ph_h])
-            cube([12, 50, 22]);                                         // tripod clamp
-        color("Black") translate([ph_bolt[0] - 4, ph_bolt[1] - 75, h_ft + ph_h + 22])
-            cube([8, 150, 72]);                                         // phone
-    }
     color("AliceBlue", 0.4) translate([foot_x[0] - 15, foot_y[0] - 15, -feet_h - 2])
         cube([foot_x[1] - foot_x[0] + 90, foot_y[1] - foot_y[0] + 30, 2]);
 }
 if (part == "foot")  foot();
 if (part == "tilt")  translate([0, z_ct, tw]) rotate([90, 0, 0]) tilt();
 if (part == "knob")  knob();
-if (part == "phone") translate([0, 0, -ph_x[0]]) rotate([0, -90, 0]) phone_mount();

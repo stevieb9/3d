@@ -25,21 +25,24 @@ adjustable focus, 2.8–5.2 V at 25 mA.
 
 | Part | STL | Print | Notes |
 |---|---|---|---|
-| Foot | `foot.stl` | flat, as exported | 125 × 87 × 16; three rubber bumpers underneath; pocket for a 2×AA holder |
+| Foot | `foot.stl` | flat, as exported | 125 × 87 × 16; three rubber bumpers underneath; pocket for a 3×AAA holder |
 | Tilt stage | `tilt.stl` | **on its side**, as exported | so the flexure bends along the layers |
 | Knob | `knob.stl` | flat | for the jack screw; a spare is cheap |
-| Phone bracket (optional) | `phone_mount.stl` | as exported | holds a 1/4"-20 bolt for a phone tripod clamp |
 
-Previews: `preview_iso.png`, `preview_side.png`, `preview_top.png`, and
-`preview_phone.png` (with the bracket and a phone).
+Previews: `preview_iso.png`, `preview_side.png` and `preview_top.png`.
 
 ## Hardware
 
 - Adafruit 1054 laser
-- 2×AA battery holder with an on/off switch, about 58 × 32 × 16 mm. The
-  pocket is sized by `batt`, so **measure yours**. Use **lithium AAs**: they
-  hold their voltage in the cold, and alkalines can fall below the laser's
-  2.8 V minimum well before they're flat.
+- **3×AAA battery holder with an on/off switch**: the Amazon.ca six-pack
+  (B0C7VV29QR), with a 15 cm lead and a PH2.0 JST plug. The pocket is sized
+  from Adafruit's near-identical #727 (63.5 × 36.8 × 15.7 mm) by `batt`, so
+  **measure yours**. Cut off the plug and solder the leads to the laser's,
+  red to red.
+- **3 × AAA cells, alkaline or NiMH.** Three cells give 4.5–4.8 V fresh and
+  about 3 V near flat, inside the laser's 2.8–5.2 V. That's about 40 hours
+  on alkalines by estimate. **Not lithium:** fresh lithium cells can top
+  5.2 V.
 - 3 stick-on rubber bumpers, Ø12.7 × 3.5 mm (3M Bumpon size)
 - M3 screws:
   - 1 × **M3×25** for the jack screw. A hex head press-fits the knob; a cap
@@ -48,8 +51,6 @@ Previews: `preview_iso.png`, `preview_side.png`, `preview_top.png`, and
   - 2 × **M3×20** to bolt the tilt stage to the foot, from underneath.
 - 4 × M3 nuts
 - 1 hair elastic or small rubber band
-- Phone option: 2 × M3×20, 2 × M3 nuts, a 1/4"-20 × 1/2" hex bolt, and any
-  phone tripod clamp
 
 ## Assembly
 
@@ -66,11 +67,8 @@ Previews: `preview_iso.png`, `preview_side.png`, `preview_top.png`, and
    sticking out the front, so the lens can still turn, and the leads out the
    back. Snug the M3×16 pinch screw gently.
 6. **Power.** Stick the bumpers into their recesses. Put the battery holder
-   in its pocket and join the laser leads to it (red +, black −; solder and
-   heat-shrink).
-7. **Phone option.** Bolt the bracket to the front-left corner with
-   2 × M3×20 into nuts under the foot. Push the 1/4"-20 bolt up through the
-   top plate and screw on the phone clamp.
+   in its pocket with its switch facing up, and join the laser leads to it
+   (red +, black −; solder and heat-shrink).
 
 ## At the rink
 
@@ -88,8 +86,9 @@ Previews: `preview_iso.png`, `preview_side.png`, `preview_top.png`, and
    can be a few degrees off), loosen the pinch screw and roll the laser
    until the error lies sideways, where turning the foot takes it out.
    Then retighten.
-6. **Film it** from beside the laser on the phone bracket, or from behind
-   it.
+6. **Film it** from a separate tripod beside or behind the laser. Keep the
+   camera off the foot: tapping record on a phone that rode on the foot
+   would knock the aim.
 
 ## Safety
 
@@ -113,8 +112,7 @@ polished granite and wet ice.
 | `las_len` | 31.0 | laser overall length (spec) |
 | `las_free` | 11 | how much of the front must stay out of the clamp so the focus lens can turn |
 | `feet_d`, `feet_h` | 12.7, 3.5 | your rubber bumpers |
-| `batt` | 58 × 32 × 16 | your battery holder |
-| `tri_len` | 12.7 | 1/4"-20 bolt length (phone option) |
+| `batt` | 64 × 37 × 16 | your 3×AAA holder; the switch must face up |
 
 **Not yet tried at a rink.** The dot's size and brightness at 37.5 m are
 estimates; Adafruit lists no beam divergence. Before printing, it's worth
@@ -122,7 +120,7 @@ shining the laser down a sheet, or any 35 m+ hallway, to see the dot.
 
 ## Checks done (2026-11-15)
 
-- All four parts render as single closed solids.
+- All three parts render as single closed solids.
 - **Collisions:** the arm clears the base and the foot across ±4.5° of tilt.
   First contact comes past −4.5° (by calculation near −5°), when the arm
   meets the pedestal under the jack screw, which acts as a stop.
@@ -147,15 +145,14 @@ shining the laser down a sheet, or any 35 m+ hallway, to see the dot.
 openscad -D 'part="foot"'  -o foot.stl        curling_laser_mount.scad
 openscad -D 'part="tilt"'  -o tilt.stl        curling_laser_mount.scad
 openscad -D 'part="knob"'  -o knob.stl        curling_laser_mount.scad
-openscad -D 'part="phone"' -o phone_mount.stl curling_laser_mount.scad
 ```
 
 Previews (OpenSCAD preview mode, 1400 × 1000, run from this folder):
 
 ```
-for v in "iso 60,0,35 p false" "phone 62,0,215 p true" "side 90,0,0 o false" "top 0,0,0 o false"; do
+for v in "iso 60,0,35 p" "side 90,0,0 o" "top 0,0,0 o"; do
   set -- $v
-  openscad -D "with_phone=$4" --imgsize=1400,1000 --viewall --autocenter \
+  openscad --imgsize=1400,1000 --viewall --autocenter \
     --projection=$3 --camera=0,0,0,$2,0 -o preview_$1.png curling_laser_mount.scad
 done
 ```
