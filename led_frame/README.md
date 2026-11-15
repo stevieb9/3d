@@ -17,6 +17,8 @@ assembled.
      tight on the first test print; + 0.8 has not been printed yet.
      Cutouts are centred on the true plunger positions (the KiCad
      footprint origin is pin 1 — centres are origin + (3.25, −2.25)).
+     The deck's underside is only 1.6 mm above the board, so a Ø5 × 1 mm
+     pocket in it clears the head of the board's bottom-right screw.
   - The screen and button decks run **flat to the right edge** — the tall
     frame exists only on the left and across the top band. The
     bottom-right corner post is short (it stops under the button deck, so
@@ -51,6 +53,13 @@ recentred to the module's real courtyard centre (was 11.5 mm off) plus a
 guide tunnel across the 8 mm post margin (a micro-B nose is ~6 mm and could
 never have reached); pot-tier boundary moved east of the 470 µF's body;
 bottom-left standoff chord-cut clear of J1's pin-1 solder tail.
+
+A second pass (2026-11-15) probed `top.stl` straight up from every
+footprint's body for the lowest roof over each part. Two more fixes came
+out of it: the T1|T2 step wall now stands wholly east of `zx1` (it
+straddled `zx1` and cut 0.66 mm into C4 from 9.4 mm up), and the button
+deck got the screw-head pocket above. The limits in the measurement list
+come from the same probe.
 
 **The OLED module and glass are not in the board file** (the footprint
 holds only the 4-pin header; the module hangs south of it), so they were
@@ -87,6 +96,8 @@ roof over that part, probed on `top.stl` against the board's footprints:
    passes over its south edge).
 3. **C1** (0.1 µF disc) height above board: must be < **7.0** (it lives
    under the resting pot tier).
+4. **C4** (470 µF) height above board: must be < **14.18** (the step
+   wall's bond tab passes over its east edge; `cap_h` assumes 13.0).
 
 ## Printing (0.4 mm nozzle)
 

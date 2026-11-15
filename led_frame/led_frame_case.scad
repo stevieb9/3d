@@ -6,8 +6,9 @@
 //    T2 pots  : mid-bottom; underside RESTS on the two 9.7 mm square
 //               pot bodies, shafts pass through holes
 //    T3 screen: right-middle; low deck over the OLED with a window
-//    T4 btns  : bottom-right; deck TOP is level with the tact-switch
-//               plunger tops, plungers poke through flush
+//    T4 btns  : bottom-right; deck TOP is flush with the tact-switch
+//               square bodies, plungers stand ~2 mm proud; a pocket
+//               in its underside clears a board screw's head
 //  BOTTOM = flat plate with four PCB standoffs (1.90 mm pilots, board's
 //  2.2 mm M2 holes pass the screws); the plate screws up into corner
 //  posts inside the top shell from underneath.
@@ -105,6 +106,13 @@ jst_w = 12.0; jst_h = 7.5; jst_z_ctr = 13.0;
 // ---- corner posts (screws enter from under the bottom plate) --------
 post_size = 7; post_pilot_d = 1.90; post_pilot_dep = 9; plate_clear_d = 2.6;
 
+// ---- board-screw head pocket ------------------------------------------
+// The board's bottom-right M2 hole sits under the button deck, whose
+// underside is only btn_body_h - t4_th (1.6) above the board, and an M2
+// pan head is 1.3-1.6 tall. A pocket in the deck's underside clears it.
+head_pocket_d   = 5.0;  // M2 pan head is Ø4.0 max
+head_pocket_dep = 1.0;  // leaves t4_th - this (1.0) of deck above it
+
 // =====================================================================
 //  DERIVED LAYOUT
 // =====================================================================
@@ -151,9 +159,11 @@ zones = [ [Z1a, zu1, zt1], [Z1b, zu1, zt1], [Z1c, zu1, zt1], [Z1d, zu1, zt1],
 // AFTER hollowing so the cavities can't shave them.
 xm = ox - wall - side_margin;    // right-margin boundary (T1 frame)
 skirts = [
-  // T1 | T2 at x=zx1: wall, then bond tab kept entirely on the tall side
-  // so it stays buried under the Z1a roof instead of poking proud
-  [bx0+zx1-1.2, 0,           bx0+zx1+1.2, by0+zy1,     zt2,     zu1],
+  // T1 | T2 at x=zx1: wall stands wholly EAST of zx1, on the T2 slab.
+  // C4's Ø8 body reaches x=19.24 and is 13 tall: a wall straddling zx1
+  // cut 0.66 into it. The bond tab stays on the tall side, buried under
+  // the Z1a roof, and meets the wall through the eps overlap.
+  [bx0+zx1,     0,           bx0+zx1+1.2, by0+zy1,     zt2,     zu1],
   [bx0+zx1-1.2, 0,           bx0+zx1,     by0+zy1,     zu1-0.3, zu1+0.5],
   // T1 | T2 at y=zy1 (east ends stop where the left ramp's slope dives
   // below them — the ramp panel takes over the seal from there)
@@ -177,7 +187,9 @@ skirts = [
 ];
 
 // [x, y, height]: the bottom-right post lives under the lowered button
-// deck, so it stops at that deck's underside (9.25 — the 9 mm pilot fits)
+// deck, so it stops at that deck's underside (zu4); its pilot runs up
+// into the deck and stops 0.6 under the deck's top face (8.6 deep at
+// the defaults, so an M2x10 through the plate still fits)
 post_pos = [ [wall,                  wall,                  zu1],
              [ox - wall - post_size, wall,                  zu4],
              [wall,                  oy - wall - post_size, zu1],
@@ -278,6 +290,10 @@ module top() {
             translate([p[0] + post_size/2, p[1] + post_size/2, -1])
                 cylinder(d = post_pilot_d,
                          h = min(post_pilot_dep, p[2] + t4_th - 0.6) + 1);
+        // head pocket in the button deck's underside, over the board's
+        // bottom-right M2 hole (the only board screw under a low deck)
+        translate([babs(board_holes[1])[0], babs(board_holes[1])[1], zu4 - 1])
+            cylinder(d = head_pocket_d, h = 1 + head_pocket_dep);
     }
 }
 
