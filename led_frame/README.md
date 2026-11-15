@@ -60,7 +60,7 @@ Defaults are typical-part values; the `.scad` header groups them:
 | `pot_body_h` | 7.0 | pot square-body top above board (tier 2 rests here) |
 | `oled_glass_h` | 5.6 | OLED glass top above board |
 | `oled_win` / `oled_win_dy` | 24×13, −1.5 | glass vs module centre |
-| `usb_above_board` | 5.5 | **confirmed by photo** — normal header-strip stack (2.54 + 1.6 + half shell); nothing to measure |
+| `usb_above_board` | 1.25 | **measured** — this module's USB is underside-mounted, shell top 2.6 above the board; slot is 13×8.5 with the guide tunnel running floor-to-top |
 | `standoff_h` | 4.0 | ≥ solder-tail protrusion under the board |
 | `btn_body_h` | 3.6 | switch square-body top above board (deck is flush here) |
 | `btn_body_w` | 6.12 | switch body width — **measured** |

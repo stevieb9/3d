@@ -54,7 +54,10 @@ btn_body_h   = 3.6;    // VERIFY: 6x6 tact SQUARE BODY top — T4 top = this;
                        // deck wraps the bodies, plungers stand ~2 mm proud
                        // (plunger tops measured 5.65 above board)
 btn_body_w   = 6.12;   // measured: square body width
-btn_cut_clear = 0.4;   // square cutout = body + this
+btn_cut_clear = 0.8;   // square cutout = body + this. FDM prints interior
+                       // square holes ~0.15/side undersize (corner
+                       // rounding + swell) — 0.4 proved too tight on the
+                       // first test print
 
 // ---- component positions, board-local (from KiCad) ------------------
 // KiCad footprint origins are PIN 1 for both the pots and the switches —
@@ -85,10 +88,13 @@ zy2 = 18.1;   // T4 | T3 — the OLED module PCB reaches down to y=18.36
 zy3 = 46.0;   // T3 | T1 top band      (C3 body starts 47.07)
 
 // ---- wall openings --------------------------------------------------
-usb_w = 13.0; usb_h = 7.0;
-usb_above_board = 5.5; // confirmed by photo: normal header-strip stack —
-                       // 2.54 header + 1.6 module PCB + half the ~2.7 mm
-                       // micro-B shell. The 13x7 slot forgives ±1 mm.
+usb_w = 13.0; usb_h = 8.5;
+usb_above_board = 1.25; // MEASURED (fit test): this module mounts its USB
+                        // on the UNDERSIDE — shell hangs in the header gap
+                        // nearly touching the main PCB, shell top ~2.6
+                        // above the board -> centre 2.6 - 1.35. The plug's
+                        // nose passes ~0.25 above the main board's edge;
+                        // the 8.5 slot height gives ±2 mm of forgiveness.
 // Strip-wire exit, left wall: the strip's 3-pin JST XH plug (XHP-3
 // housing, 9.9 x 5.75 plus its latch rib) must PASS THROUGH, so it's a
 // generous slot — ~2 mm spare on width, ~1.5 on height. Positioned just
@@ -158,14 +164,15 @@ skirts = [
   // a small slit would open between the T2 roof and the panel underside
   [bx0+zx2-1.6, by0+zy1-2.4, bx0+zx2+0.2, by0+zy1,     zt2-0.3, 17.2],
   // (right-margin skirt deleted: the terraces now run to the right edge)
-  // T2 | T4 at x=zx2: wall 55.7..58.1 (RV2 body ends 55.46), plus a thin
-  // column rising into the T2 slab as its bond (55.7..56.0 < zx2=56)
-  [bx0+55.7,    0,           bx0+58.1,    by0+zy2,     zt4,     zu2],
-  [bx0+55.7,    0,           bx0+56.0,    by0+zy2,     zt4,     zu2+0.5],
-  // T3 | T4 at y=zy2, through the right wall band. The wall now reaches
-  // down to the lower T4 deck, so it sits fully SOUTH of the boundary —
-  // the OLED module body starts just 0.08 north of it (y=23.48).
-  [bx0+zx2,     by0+zy2-2.4, ox,          by0+zy2-0.1, zt4,     zu3],
+  // T2 | T4 at x=zx2: 1.2 mm wall dropped straight at RV2's body edge
+  // (courtyard ends 54.76 -> 0.24 clear) instead of set back — buys the
+  // SEL button ~1.9 mm of finger room. Thin column bonds into the T2 slab.
+  [bx0+55.0,    0,           bx0+56.2,    by0+zy2,     zt4,     zu2],
+  [bx0+55.0,    0,           bx0+55.9,    by0+zy2,     zt4,     zu2+0.5],
+  // T3 | T4 at y=zy2: 1.1 mm wall dropped straight at the OLED module's
+  // measured south edge (18.36 -> 0.36 clear) — ~1.2 mm more room above
+  // the button row. Tab bridges the 0.1 gap to the T3 slab and bonds it.
+  [bx0+zx2,     by0+zy2-1.2, ox,          by0+zy2-0.1, zt4,     zu3],
   [bx0+zx2,     by0+zy2-0.3, ox,          by0+zy2+1.2, zu3-0.2, zu3+0.5],
 ];
 
@@ -237,10 +244,12 @@ module top() {
             // USB guide tunnel: the board sits 8 mm off the left wall
             // (post margin) and a micro-B plug's nose is only ~6 mm — this
             // duct carries the plug from the wall slot to the module edge
-            // so it can actually reach the socket.
-            translate([wall-0.2, babs([0, m1_usb_y])[1] - usb_w/2 - 2.4,
-                       usb_z_ctr - usb_h/2 - 2.4])
-                cube([bx0 - 0.6 - (wall-0.2), usb_w + 4.8, usb_h + 4.8]);
+            // so it can actually reach the socket. With the socket now
+            // near board level, the duct runs floor-to-top: it prints on
+            // the bed and bears on the bottom plate when assembled.
+            translate([wall-0.2, babs([0, m1_usb_y])[1] - usb_w/2 - 2.4, 0])
+                cube([bx0 - 0.6 - (wall-0.2), usb_w + 4.8,
+                      usb_z_ctr + usb_h/2 + 2.4]);
         }
         // pot shaft holes
         for (p = pot_pos)
